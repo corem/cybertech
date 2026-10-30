@@ -1,0 +1,11 @@
+$kind: collection
+description: End-to-end demo. Run in order, with the authorization server started with the demo profile. See README.md.
+variables:
+  authServerUrl: http://localhost:9000
+  resourceServerUrl: http://localhost:8080
+  subject: alice
+  accessToken: ""
+  initialKid: ""
+  rotatedKid: ""
+  rotatedToken: ""
+  forgedToken: ""

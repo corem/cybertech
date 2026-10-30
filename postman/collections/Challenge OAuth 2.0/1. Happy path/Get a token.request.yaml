@@ -1,0 +1,33 @@
+$kind: http-request
+url: "{{authServerUrl}}/oauth2/token"
+method: POST
+headers:
+  Content-Type: application/x-www-form-urlencoded
+body:
+  type: urlencoded
+  content:
+    subject: "{{subject}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('200 and RFC 6749 response', () => {
+        pm.response.to.have.status(200);
+        const body = pm.response.json();
+        pm.expect(body.token_type).to.eql('Bearer');
+        pm.expect(body.expires_in).to.eql(900);
+        pm.expect(pm.response.headers.get('Cache-Control')).to.eql('no-store');
+      });
+      const token = pm.response.json().access_token;
+      const decode = (part) => JSON.parse(atob(part.replace(/-/g, '+').replace(/_/g, '/')));
+      const [header, claims] = token.split('.').slice(0, 2).map(decode);
+      pm.test('Expected header and claims', () => {
+        pm.expect(header.alg).to.eql('RS256');
+        pm.expect(header.kid).to.be.a('string');
+        pm.expect(claims.sub).to.eql(pm.collectionVariables.get('subject'));
+        pm.expect(claims.iss).to.eql('http://localhost:9000');
+        pm.expect(claims.exp - claims.iat).to.eql(900);
+      });
+      pm.collectionVariables.set('accessToken', token);
+      pm.collectionVariables.set('initialKid', header.kid);
+    language: text/javascript
+order: 1000

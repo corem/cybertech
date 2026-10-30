@@ -1,0 +1,15 @@
+$kind: http-request
+url: "{{resourceServerUrl}}/api/hello"
+method: GET
+auth:
+  type: bearer
+  credentials:
+    token: "{{rotatedToken}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Accepted without restarting the resource server', () => {
+        pm.response.to.have.status(200);
+      });
+    language: text/javascript
+order: 3000

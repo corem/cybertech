@@ -1,0 +1,7 @@
+# Use this workspace to collaborate
+workspace:
+  id: 49e605dc-9c01-4cf7-a171-2588819f4f37
+
+localResources:
+  collections:
+    - ../postman/collections/Challenge OAuth 2.0

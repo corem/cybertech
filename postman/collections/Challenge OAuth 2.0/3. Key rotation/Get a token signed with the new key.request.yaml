@@ -1,0 +1,21 @@
+$kind: http-request
+url: "{{authServerUrl}}/oauth2/token"
+method: POST
+headers:
+  Content-Type: application/x-www-form-urlencoded
+body:
+  type: urlencoded
+  content:
+    subject: "{{subject}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('The token carries the kid of the new key', () => {
+        pm.response.to.have.status(200);
+        const token = pm.response.json().access_token;
+        const header = JSON.parse(atob(token.split('.')[0].replace(/-/g, '+').replace(/_/g, '/')));
+        pm.expect(header.kid).to.eql(pm.collectionVariables.get('rotatedKid'));
+        pm.collectionVariables.set('rotatedToken', token);
+      });
+    language: text/javascript
+order: 2000

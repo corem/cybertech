@@ -1,0 +1,16 @@
+$kind: http-request
+url: "{{resourceServerUrl}}/api/hello"
+method: GET
+auth:
+  type: bearer
+  credentials:
+    token: "{{accessToken}}"
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('200 and greeting of the subject', () => {
+        pm.response.to.have.status(200);
+        pm.expect(pm.response.json().message).to.eql(`Hello, ${pm.collectionVariables.get('subject')}!`);
+      });
+    language: text/javascript
+order: 3000

@@ -1,0 +1,14 @@
+$kind: http-request
+url: "{{authServerUrl}}/.well-known/jwks.json"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('The token key is published, with no private part', () => {
+        pm.response.to.have.status(200);
+        const key = pm.response.json().keys.find((k) => k.kid === pm.collectionVariables.get('initialKid'));
+        pm.expect(key).to.be.an('object');
+        pm.expect(key).to.not.have.property('d');
+      });
+    language: text/javascript
+order: 2000

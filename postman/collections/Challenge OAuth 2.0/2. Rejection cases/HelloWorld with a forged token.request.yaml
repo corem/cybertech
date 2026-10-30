@@ -1,0 +1,25 @@
+$kind: http-request
+url: "{{resourceServerUrl}}/api/hello"
+method: GET
+auth:
+  type: bearer
+  credentials:
+    token: "{{forgedToken}}"
+scripts:
+  - type: beforeRequest
+    code: |-
+      // Replaces the subject while keeping the original signature
+      const [header, payload, signature] = pm.collectionVariables.get('accessToken').split('.');
+      const claims = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
+      claims.sub = 'admin';
+      const forged = btoa(JSON.stringify(claims)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+      pm.collectionVariables.set('forgedToken', `${header}.${forged}.${signature}`);
+    language: text/javascript
+  - type: afterResponse
+    code: |-
+      pm.test('401 invalid_token', () => {
+        pm.response.to.have.status(401);
+        pm.expect(pm.response.headers.get('WWW-Authenticate')).to.include('invalid_token');
+      });
+    language: text/javascript
+order: 3000

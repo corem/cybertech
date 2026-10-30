@@ -1,0 +1,17 @@
+$kind: http-request
+url: "{{authServerUrl}}/oauth2/token"
+method: POST
+headers:
+  Content-Type: application/x-www-form-urlencoded
+body:
+  type: urlencoded
+  content: []
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('400 invalid_request', () => {
+        pm.response.to.have.status(400);
+        pm.expect(pm.response.json().error).to.eql('invalid_request');
+      });
+    language: text/javascript
+order: 1000

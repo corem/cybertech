@@ -1,0 +1,15 @@
+$kind: http-request
+url: "{{authServerUrl}}/demo/keys/rotate"
+method: POST
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('New key active, old one still published', () => {
+        pm.response.to.have.status(200);
+        const body = pm.response.json();
+        pm.expect(body.activeKid).to.not.eql(pm.collectionVariables.get('initialKid'));
+        pm.expect(body.publishedKids).to.include(pm.collectionVariables.get('initialKid'));
+        pm.collectionVariables.set('rotatedKid', body.activeKid);
+      });
+    language: text/javascript
+order: 1000

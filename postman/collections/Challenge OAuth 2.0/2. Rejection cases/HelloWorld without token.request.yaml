@@ -1,0 +1,12 @@
+$kind: http-request
+url: "{{resourceServerUrl}}/api/hello"
+method: GET
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('401 with Bearer challenge', () => {
+        pm.response.to.have.status(401);
+        pm.expect(pm.response.headers.get('WWW-Authenticate')).to.match(/^Bearer/);
+      });
+    language: text/javascript
+order: 2000
